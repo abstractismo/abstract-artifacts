@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<title>Abstract - Terrain synesthesique (couleur x distorsion sur image)</title>
+<style>
+:root{--bg:#fafaf8;--ink:#1d1d1b;--line:#e9e9e6;--muted:#7a7a76;--accent:#1b9750;--panel:#fff;--soft:#f4f4f1;--check1:#f4f1ea;--check2:#eae5da}
+html[data-theme=dark]{--bg:#16171a;--ink:#e9e7e1;--line:#2d2f34;--muted:#9c9a91;--accent:#2ec46e;--panel:#1e2025;--soft:#26282d;--check1:#2a2c31;--check2:#232529}
+html[data-theme=dark] input:not([type=color]),html[data-theme=dark] select,html[data-theme=dark] textarea{background:var(--panel);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] ::placeholder{color:var(--muted)}
+
+  :root{--bg:#fafaf8;--ink:#1d1d1b;--line:#e9e9e6;--muted:#7a7a76}
+  *{box-sizing:border-box}
+  body{font:14px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;margin:0;padding:24px;background:var(--bg);color:var(--ink)}
+  h1{font-size:22px;margin:0 0 4px}
+  .intro{color:var(--muted);max-width:96ch;margin:0 0 16px}.intro b{color:var(--ink)}
+  .cols{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+  .cols>div{min-width:0}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  h3{font-size:12px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  #drop{border:2px dashed var(--line);border-radius:10px;padding:20px;text-align:center;color:var(--muted);cursor:pointer;font-size:13px}
+  #drop.hot{border-color:var(--ink);background:var(--soft)}
+  .monos{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+  .mono{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:20px;padding:3px 9px 3px 4px;cursor:pointer;font-size:11px}
+  .mono:hover{background:var(--soft)}.mono.on{border-color:var(--ink);background:var(--soft);font-weight:700}
+  .mono .dot{width:15px;height:15px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+  .sg{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12px;color:var(--muted)}
+  .sg label{flex:0 0 118px}.sg input[type=range]{flex:1;min-width:0}.sg .v{flex:0 0 34px;text-align:right;font-family:monospace;color:var(--ink)}
+  .btn{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 11px;cursor:pointer;color:var(--ink)}.btn:hover{background:var(--soft)}
+  .stage{position:relative;border-radius:10px;overflow:hidden;background:var(--soft);min-height:200px;display:flex;align-items:center;justify-content:center}
+  .stage img{display:block;max-width:100%}
+  #stageB img{filter:url(#fx)}
+  .stage .wrap{position:relative;display:block;font-size:0;max-width:100%}
+  .stage .ov{position:absolute;inset:0;pointer-events:none}
+  .stage .tint{mix-blend-mode:multiply}
+  .stage .grain{mix-blend-mode:overlay;background-repeat:repeat}
+  .row2{display:flex;gap:10px;margin-top:16px}
+  .row2 .stage{flex:1}
+  .cap{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+  .pex{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .pex input{font:inherit;font-size:12px;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
+  .pex input#pkey{flex:1;min-width:120px;font-family:monospace}
+  .hint{font-size:11px;color:var(--muted)}
+  .warn{font-size:11px;color:#9a6e00;background:var(--panel)8e9;border:1px solid #f0e0b0;border-radius:8px;padding:8px 10px;margin-top:10px}
+</style>
+
+<h1>Abstract - Terrain synesthesique</h1>
+<p class="intro">La grammaire en action : un arome appelle <b>une couleur</b> (axe couleur) ET <b>une distorsion</b> (axe forme) - ensemble, la signature d'un ingredient. Ici on l'applique a une <b>image</b> : choisis un Monochrome, il pose sa teinte et le preset de distorsion que l'arome appelle (librairie), puis affine. Effets = sous-ensemble web-faisable (filtres SVG/CSS) de la librairie. 100% local. <b>Piece a casser.</b> Rappel Evin : la distorsion est comms-facing, l'intensite est un cadran (garder lisible), toute sortie comms passe par le gate (projet 12).</p>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <h3>Image</h3>
+      <div id="drop">Glisse une image, clique, ou Cmd/Ctrl+V<input type="file" id="file" accept="image/*" hidden></div>
+      <div class="pex">
+        <input type="password" id="pkey" placeholder="cle API Pexels (gratuite, collee par toi)">
+      </div>
+      <div class="hint" style="margin-top:6px">Ou charge une image thematique par Monochrome (Pexels, ta cle) :</div>
+      <div class="monos" id="pexmonos"></div>
+      <div class="hint" id="pexnote"></div>
+    </div>
+    <div class="card">
+      <h3>Signature : Monochrome</h3>
+      <div class="monos" id="monos"></div>
+      <div class="hint" id="preset"></div>
+    </div>
+    <div class="card">
+      <h3>Distorsion (affiner)</h3>
+      <div class="sg"><label>teinte (opacite)</label><input type="range" id="tint" min="0" max="0.7" step="0.02" value="0.28"><span class="v" id="tintv">.28</span></div>
+      <div class="sg"><label>defocus X</label><input type="range" id="bx" min="0" max="14" step="0.5" value="2"><span class="v" id="bxv">2</span></div>
+      <div class="sg"><label>defocus Y</label><input type="range" id="by" min="0" max="14" step="0.5" value="2"><span class="v" id="byv">2</span></div>
+      <div class="sg"><label>aberration chrom.</label><input type="range" id="ca" min="0" max="16" step="0.5" value="4"><span class="v" id="cav">4</span></div>
+      <div class="sg"><label>ondulation</label><input type="range" id="disp" min="0" max="60" step="1" value="6"><span class="v" id="dispv">6</span></div>
+      <div class="sg"><label>freq. ondulation</label><input type="range" id="freq" min="0.004" max="0.09" step="0.002" value="0.02"><span class="v" id="freqv">.02</span></div>
+      <div class="sg"><label>grain</label><input type="range" id="grain" min="0" max="0.6" step="0.02" value="0.12"><span class="v" id="grainv">.12</span></div>
+      <button class="btn" id="reset">reinitialiser (preset du Monochrome)</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h3>Avant / apres</h3>
+      <div class="row2">
+        <div><div class="stage" id="stageA"><span class="hint">charge une image</span></div><div class="cap">original</div></div>
+        <div><div class="stage" id="stageB"><span class="hint">couleur x distorsion</span></div><div class="cap" id="capB">couleur x distorsion</div></div>
+      </div>
+      <div class="warn" id="evin">Rappel : plusieurs effets (defocus fort, ondulation, aberration large) peuvent evoquer une vision alteree - a doser bas et a passer au gate Evin avant tout usage comms.</div>
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute"><defs><filter id="fx" x="-20%" y="-20%" width="140%" height="140%"></filter></defs></svg>
+
+<!-- Team key: pexels-key.js next to this file (committed in the private repo; on Drive, keep
+     both files side by side) with window.ABSTRACT_PEXELS_KEY = "...";
+     a missing file just 404s harmlessly (in-page field + localStorage as fallback). -->
+<script src="pexels-key.js"></script>
+<script>
+const MONOS=[
+  ['Beurre','#f7b201',{tint:.25,bx:3,by:3,ca:2,disp:6,freq:.02,grain:.15},'lactique -> halation douce + grain'],
+  ['Framboise','#ca0471',{tint:.30,bx:2,by:4,ca:5,disp:8,freq:.02,grain:.10},'fruite/floral -> bloom doux + aberration'],
+  ['Fraise','#e02b2b',{tint:.28,bx:2,by:2,ca:6,disp:6,freq:.03,grain:.12},'fruite/doux -> punchy, aberration'],
+  ['Citron de Menton','#f2e005',{tint:.22,bx:0,by:0,ca:12,disp:4,freq:.04,grain:.08},'electrique/frais -> net + forte aberration'],
+  ['Poivron jaune','#f2a007',{tint:.25,bx:1,by:1,ca:8,disp:10,freq:.03,grain:.10},'electrique vegetal -> aberration + ondulation'],
+  ['Concombre','#1b9750',{tint:.28,bx:1,by:1,ca:2,disp:36,freq:.02,grain:.06},'aqueux -> ondulation forte, net'],
+  ['Olive noire','#454f2e',{tint:.42,bx:4,by:4,ca:3,disp:6,freq:.015,grain:.42},'fume/terreux -> chambre noire : grain + defocus'],
+  ['Banane','#f2d24a',{tint:.30,bx:5,by:5,ca:3,disp:5,freq:.02,grain:.12},'ester doux -> reverie : defocus + chaud'],
+];
+let cur=5, tintColor=MONOS[5][1];
+const $=id=>document.getElementById(id);
+const P={tint:.28,bx:2,by:2,ca:4,disp:6,freq:.02,grain:.12};
+
+// grain data-uri (SVG fractal noise)
+const grainURL="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+
+function buildFilter(){
+  const {ca,bx,by,disp,freq}=P;
+  const f=$('fx');
+  f.innerHTML=`
+    <feTurbulence type="turbulence" baseFrequency="${freq}" numOctaves="2" seed="7" result="turb"/>
+    <feDisplacementMap in="SourceGraphic" in2="turb" scale="${disp}" xChannelSelector="R" yChannelSelector="G" result="disp"/>
+    <feColorMatrix in="disp" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+    <feOffset in="r" dx="${ca}" dy="0" result="ro"/>
+    <feColorMatrix in="disp" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+    <feColorMatrix in="disp" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+    <feOffset in="b" dx="${-ca}" dy="0" result="bo"/>
+    <feBlend in="ro" in2="g" mode="screen" result="rg"/>
+    <feBlend in="rg" in2="bo" mode="screen" result="ca"/>
+    <feGaussianBlur in="ca" stdDeviation="${bx} ${by}" result="out"/>`;
+}
+function apply(){
+  buildFilter();
+  ['tint','bx','by','ca','disp','freq','grain'].forEach(k=>{const el=$(k+'v');if(el)el.textContent=(k==='tint'||k==='freq'||k==='grain')?String(P[k]).replace(/^0/,''):P[k];});
+  // overlays on stage B
+  const t=$('tintov'),g=$('grainov');
+  if(t){t.style.background=tintColor;t.style.opacity=P.tint;}
+  if(g){g.style.opacity=P.grain;g.style.backgroundImage=`url("${grainURL}")`;}
+}
+function setPreset(i){
+  cur=i;tintColor=MONOS[i][1];Object.assign(P,MONOS[i][2]);
+  document.querySelectorAll('#monos .mono').forEach((el,k)=>el.classList.toggle('on',k===i));
+  $('preset').textContent='Preset : '+MONOS[i][3];
+  $('capB').textContent=MONOS[i][0]+' - couleur x distorsion';
+  ['tint','bx','by','ca','disp','freq','grain'].forEach(k=>{$(k).value=P[k];});
+  apply();
+}
+// build monochrome pickers
+$('monos').innerHTML=MONOS.map(([n,c],i)=>`<div class="mono" data-i="${i}"><span class="dot" style="background:${c}"></span>${n}</div>`).join('');
+$('monos').querySelectorAll('.mono').forEach(el=>el.onclick=()=>setPreset(+el.dataset.i));
+$('pexmonos').innerHTML=MONOS.map(([n,c],i)=>`<div class="mono" data-i="${i}" title="chercher sur Pexels"><span class="dot" style="background:${c}"></span>${n}</div>`).join('');
+$('pexmonos').querySelectorAll('.mono').forEach(el=>el.onclick=()=>pexFetch(+el.dataset.i));
+
+// sliders
+['tint','bx','by','ca','disp','freq','grain'].forEach(k=>{$(k).oninput=e=>{P[k]=+e.target.value;apply();};});
+$('reset').onclick=()=>setPreset(cur);
+
+// image loading
+function showImage(src){
+  $('stageA').innerHTML=`<img src="${src}" alt="">`;
+  $('stageB').innerHTML=`<span class="wrap"><img src="${src}" alt=""><div class="ov tint" id="tintov"></div><div class="ov grain" id="grainov"></div></span>`;
+  apply();
+}
+const loadFile=f=>{if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=()=>showImage(r.result);r.readAsDataURL(f);};
+const drop=$('drop'),file=$('file');
+drop.onclick=()=>file.click();file.onchange=()=>loadFile(file.files[0]);
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('hot');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('hot'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('hot');loadFile(e.dataTransfer.files[0]);});
+document.addEventListener('paste',e=>{for(const it of e.clipboardData.items)if(it.type.startsWith('image/'))loadFile(it.getAsFile());});
+
+// Pexels (thematic per Monochrome) - uses the user's own free key, entered locally
+const QUERIES=['butter cream','raspberry','strawberry','lemon Menton Cote d Azur','yellow bell pepper','cucumber water fresh','black olive Nyons','banana'];
+async function pexFetch(i){
+  const key=$('pkey').value.trim();
+  if(!key){$('pexnote').textContent='Colle ta cle API Pexels (gratuite : pexels.com/api) pour charger des images thematiques.';return;}
+  $('pexnote').textContent='Recherche "'+QUERIES[i]+'"...';
+  try{
+    const r=await fetch('https://api.pexels.com/v1/search?per_page=15&query='+encodeURIComponent(QUERIES[i]),{headers:{Authorization:key}});
+    if(!r.ok){$('pexnote').textContent='Pexels: erreur '+r.status+(r.status===401?' (cle invalide)':'');return;}
+    const d=await r.json();const ph=d.photos&&d.photos.length?d.photos[Math.floor(d.photos.length*0.5)]:null;
+    if(!ph){$('pexnote').textContent='Aucun resultat.';return;}
+    setPreset(i);showImage(ph.src.large);
+    $('pexnote').innerHTML='Photo: <a href="'+ph.url+'" target="_blank" rel="noopener">'+(ph.photographer||'Pexels')+'</a> (Pexels)';
+  }catch(err){$('pexnote').textContent='Fetch impossible (reseau/CORS): '+err.message;}
+}
+
+// remember the Pexels key in localStorage (this browser only, never in the repo)
+try{$('pkey').value=(window.ABSTRACT_PEXELS_KEY)||localStorage.getItem('abstractPexelsKey')||'';}catch(e){}
+$('pkey').addEventListener('input',()=>{try{localStorage.setItem('abstractPexelsKey',$('pkey').value);}catch(e){}});
+setPreset(5);
+</script>
+<button id="abxTheme" title="clair / sombre" style="position:fixed;top:10px;right:10px;z-index:99999;font:14px sans-serif;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:6px 11px;cursor:pointer">&#9680;</button>
+<script>(function(){function ap(t){document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("abx-theme",t);}catch(e){}var b=document.getElementById("abxTheme");if(b)b.innerHTML=t==="dark"?"\u2600":"\u25D0";}ap((function(){try{return localStorage.getItem("abx-theme");}catch(e){return null;}})()||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));document.getElementById("abxTheme").onclick=function(){ap(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");};})();</script>
+
+
+
+<!-- ABX-I18N -->
+<script>
+(function(){
+  var DICT={"(axe couleur) ET": "(colour axis) AND", "(axe forme) - ensemble, la signature d'un ingredient. Ici on l'applique a une": "(form axis) - together, the signature of an ingredient. Here we apply it to an", "(cle invalide)": "(invalid key)", "- couleur x distorsion": "- colour x distortion", ": choisis un Monochrome, il pose sa teinte et le preset de distorsion que l'arome appelle (librairie), puis affine. Effets = sous-ensemble web-faisable (filtres SVG/CSS) de la librairie. 100% local.": ": pick a Monochrome, it sets its tint and the distortion preset the aroma calls for (library), then refine. Effects = web-feasible subset (SVG/CSS filters) of the library. 100% local.", "Abstract - Terrain synesthesique": "Abstract - Synesthetic terrain", "Abstract - Terrain synesthesique (couleur x distorsion sur image)": "Abstract - Synesthetic terrain (colour x distortion on image)", "Aucun resultat.": "No results.", "Avant / apres": "Before / after", "Citron de Menton": "Menton lemon", "Colle ta cle API Pexels (gratuite : pexels.com/api) pour charger des images thematiques.": "Paste your Pexels API key (free: pexels.com/api) to load thematic images.", "Distorsion (affiner)": "Distortion (refine)", "Fetch impossible (reseau/CORS):": "Fetch failed (network/CORS):", "Glisse une image, clique, ou Cmd/Ctrl+V": "Drag an image, click, or Cmd/Ctrl+V", "La grammaire en action : un arome appelle": "The grammar in action: an aroma calls for", "Olive noire": "Black olive", "Ou charge une image thematique par Monochrome (Pexels, ta cle) :": "Or load a thematic image by Monochrome (Pexels, your key):", "Pexels: erreur": "Pexels: error", "Piece a casser.": "Piece to challenge.", "Poivron jaune": "Yellow pepper", "Preset :": "Preset:", "Rappel : plusieurs effets (defocus fort, ondulation, aberration large) peuvent evoquer une vision alteree - a doser bas et a passer au gate Evin avant tout usage comms.": "Reminder: several effects (strong defocus, ripple, wide aberration) can evoke altered vision - keep the dose low and run it through the Evin gate before any comms use.", "Rappel Evin : la distorsion est comms-facing, l'intensite est un cadran (garder lisible), toute sortie comms passe par le gate (projet 12).": "Evin reminder: distortion is comms-facing, intensity is a dial (keep it legible), every comms output goes through the gate (project 12).", "Recherche \"": "Searching \"", "Signature : Monochrome": "Signature: Monochrome", "aberration chrom.": "chrom. aberration", "charge une image": "load an image", "chercher sur Pexels": "search on Pexels", "clair / sombre": "light / dark", "cle API Pexels (gratuite, collee par toi)": "Pexels API key (free, pasted by you)", "couleur x distorsion": "colour x distortion", "freq. ondulation": "ripple freq.", "reinitialiser (preset du Monochrome)": "reset (Monochrome preset)", "teinte (opacite)": "tint (opacity)", "un ingredient. Ici on l": "an ingredient. Here we apply it", "une couleur": "a colour", "une distorsion": "a distortion", "evoque": "evokes", "synesthesie": "synesthesia", "distorsions": "distortions", "distorsion": "distortion", "tache": "splotch", "bouteille": "bottle", "marque": "brand", "graine": "seed", "sorti": "released", "en dev": "in dev", "brouillon": "draft", "chercher": "search", "enregistrer": "save", "annuler": "cancel", "supprimer": "delete", "editer": "edit", "lexique": "lexicon", "couleur": "colour", "graine marque": "brand seed", "francais / english": "french / english", "vider le stack": "clear the stack", "preset du Monochrome courant": "current Monochrome preset", "dupliquer l'image (variante)": "duplicate the image (variant)", "copier ce stack sur toutes les images": "copy this stack to all images", "tache → extracteur": "splotch → extractor", "bouteille = packshot etiquete (pas de rendu propre)": "bottle = labelled packshot (no clean render)", "rendu bouteille a venir": "bottle render coming", "pas de tache": "no splotch", "proposal, a valider Conan/Remy": "proposal, to validate with Conan/Remy", "derivation librairie": "library derivation", "longue expo": "long exposure", "echo de mouvement": "motion echo", "clique la tache OU la bouteille": "click the splotch OR the bottle", "nouveau Monochrome (brouillon)": "new Monochrome (draft)", "Nouveau Monochrome (brouillon)": "New Monochrome (draft)", "Editer le brouillon": "Edit the draft", "graine (Monochrome, extraction, pipette, saisie)": "seed (Monochrome, extract, eyedropper, entry)", "galerie vide": "empty gallery", "image active x stack": "active image x stack", "aucun stop : clique des steps ci-dessous": "no stop: click steps below", "reordonner": "reorder", "glisser pour reordonner": "drag to reorder", "retirer": "remove", "vider": "clear", "tisse": "woven", "rampe graine 200 -> 700": "seed ramp 200 -> 700", "tisse complet": "full woven", "copier les tokens CSS (25 -> 950 + 1000)": "copy the CSS tokens (25 -> 950 + 1000)", "copier le CSS": "copy the CSS", "copier": "copy", "recommande": "recommended", "arc de teinte long (HSL / OKLCH)": "long hue arc (HSL / OKLCH)", "saturation min": "min saturation", "nb couleurs": "num colours", "steps de la graine": "seed steps", "steps du tisse": "woven steps", "conseille pour ce Monochrome": "recommended for this Monochrome", "en developpement": "in development", "tache (physique)": "splotch (physical)"}, LANG='fr';
+  try{LANG=localStorage.getItem('abx-lang')||'fr';}catch(e){}
+  function trv(v){if(!v)return null;var k=(''+v).trim();if(!k)return null;var en=DICT[k];if(en===undefined||en===k)return null;return (''+v).replace(k,en);}
+  function walk(n){
+    if(n.nodeType===3){var nv=trv(n.nodeValue);if(nv!==null)n.nodeValue=nv;return;}
+    if(n.nodeType!==1)return;var tn=n.tagName;if(tn==='SCRIPT'||tn==='STYLE')return;
+    var A=['placeholder','title','alt'];for(var i=0;i<A.length;i++){if(n.hasAttribute&&n.hasAttribute(A[i])){var nv=trv(n.getAttribute(A[i]));if(nv!==null)n.setAttribute(A[i],nv);}}
+    for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
+  }
+  function addBtn(){
+    var b=document.createElement('button');b.id='abxLang';b.textContent=(LANG==='en'?'EN':'FR');b.title='francais / english';
+    b.style.cssText='position:fixed;top:10px;right:56px;z-index:99999;font:13px sans-serif;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:6px 11px;cursor:pointer;font-weight:700';
+    b.onclick=function(){try{localStorage.setItem('abx-lang',LANG==='en'?'fr':'en');}catch(e){}location.reload();};
+    document.body.appendChild(b);
+  }
+  function start(){
+    addBtn();
+    if(LANG==='en'){
+      walk(document.body);
+      var mo=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='characterData'){walk(m.target);}else{for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j]);}}});
+      mo.observe(document.body,{childList:true,subtree:true,characterData:true});
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
+<!-- /ABX-I18N -->
+</html>

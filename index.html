@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abstract - Brand book & ateliers</title>
+<style>
+  :root{--bg:#faf7f0;--ink:#23201b;--muted:#7a746a;--line:#e7e1d6;--panel:#fff;--soft:#f3efe6;--accent:#1b9750}
+  html[data-theme=dark]{--bg:#15161a;--ink:#e9e7e1;--muted:#9c9a91;--line:#2c2e33;--panel:#1e2025;--soft:#26282d;--accent:#2ec46e}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.6 "Atkinson Hyperlegible",-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;background:var(--bg);color:var(--ink);letter-spacing:.01em}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1000px;margin:0 auto;padding:26px 22px 90px}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:8px}
+  h1{font-size:23px;margin:0}
+  .tag{font-size:12px;color:var(--muted)}
+  .controls{margin-left:auto;display:flex;gap:8px}
+  .ctl{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer}
+  .ctl .on{font-weight:700}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font:inherit;font-size:13px;border:0;background:var(--panel);color:var(--muted);padding:6px 12px;cursor:pointer}
+  .seg button.on{background:var(--ink);color:var(--bg);font-weight:700}
+  .lead{color:var(--muted);max-width:70ch;margin:16px 0 26px}
+  .note{background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 14px;font-size:13px;color:var(--muted);margin:0 0 26px;max-width:80ch}
+  .note b{color:var(--ink)}
+  .grpname{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin:26px 0 10px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;transition:border-color .15s,transform .15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card .t{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .card .d{display:block;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .card .go{font-size:12px;color:var(--accent);font-weight:700;margin-top:10px;display:inline-block}
+  .badge{font-size:10px;padding:1px 7px;border-radius:20px;background:var(--soft);color:var(--muted);font-weight:600}
+  footer{margin-top:40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 data-i18n="title">Abstract - Brand book & ateliers</h1>
+      <div class="tag" data-i18n="tag">Proposition, pièce à casser. Contenu confidentiel.</div>
+    </div>
+    <div class="controls">
+      <span class="seg" title="langue / language"><button id="fr" class="on">FR</button><button id="en">EN</button></span>
+      <button class="ctl" id="theme" title="clair / sombre">◐</button>
+    </div>
+  </header>
+
+  <p class="lead" data-i18n="lead">Le point d'entrée de tout ce qui a été produit : le lecteur du brand book (bilingue) et les ateliers interactifs couleur x distorsion. Rien à installer, tout est local et autonome.</p>
+
+  <div class="note" data-i18n="conf"><b>Confidentiel.</b> Ces pages contiennent la stratégie de marque en cours. À ne pas diffuser hors de l'équipe. Diffusion prévue via le Drive partagé (accès contrôlé), pas en public.</div>
+
+  <div class="grpname" data-i18n="g_read">Lire le brand book</div>
+  <div class="grid" id="g-read"></div>
+
+  <div class="grpname" data-i18n="g_tools">Ateliers couleur x distorsion</div>
+  <div class="grid" id="g-tools"></div>
+
+  <footer><span data-i18n="foot">Confort de lecture (dyslexie) intégré au lecteur. Chaque page a un mode clair/sombre.</span></footer>
+</div>
+
+<script>
+const T={
+  fr:{title:"Abstract - Brand book & ateliers",tag:"Proposition, pièce à casser. Contenu confidentiel.",
+    lead:"Le point d'entrée de tout ce qui a été produit : le lecteur du brand book (bilingue) et les ateliers interactifs couleur x distorsion. Rien à installer, tout est local et autonome.",
+    conf:"<b>Confidentiel.</b> Ces pages contiennent la stratégie de marque en cours. À ne pas diffuser hors de l'équipe. Diffusion prévue via le Drive partagé (accès contrôlé), pas en public.",
+    g_read:"Lire le brand book",g_tools:"Ateliers couleur x distorsion",
+    foot:"Confort de lecture (dyslexie) intégré au lecteur. Chaque page a un mode clair/sombre.",go:"ouvrir →"},
+  en:{title:"Abstract - Brand book & workbenches",tag:"Proposal, a piece to challenge. Confidential.",
+    lead:"The single entry point to everything produced: the bilingual brand-book reader and the interactive colour x distortion workbenches. Nothing to install, all local and self-contained.",
+    conf:"<b>Confidential.</b> These pages hold the in-progress brand strategy. Do not share outside the team. Distribution via the shared Drive (access-controlled), never public.",
+    g_read:"Read the brand book",g_tools:"Colour x distortion workbenches",
+    foot:"Reading comfort (dyslexia) baked into the reader. Every page has a light/dark mode.",go:"open →"}
+};
+const READ=[
+  {href:"reader.html",fr:["Lecteur du brand book","Tout le book, navigable, EN/FR, recherche, confort de lecture. Le meilleur point de départ."],en:["Brand-book reader","The whole book, navigable, EN/FR, search, reading comfort. The best starting point."],badge:"EN/FR"},
+];
+const TOOLS=[
+  {href:"core/05-color-workbench.html",fr:["Atelier tout-en-un","Graine → nuancier Fusilier → gradient → planche de distorsions. Références produit (taches/bouteilles), catalogue complet, intros par arôme."],en:["All-in-one workbench","Seed → Fusilier scale → gradient → distortion board. Product references (splotches/bottles), full catalogue, per-aroma intros."],badge:"★"},
+  {href:"core/05-color-workbench-tabs.html",fr:["Atelier 3 onglets","La même chose en 3 étapes : trouver la couleur / extraire l'asset / distordre."],en:["3-tab workbench","Same, in 3 steps: find the colour / extract the asset / distort."]},
+  {href:"core/01-synesthetic-playground.html",fr:["Terrain synesthésique","Explorer le lien arôme → distorsion via le registre synesthésique."],en:["Synesthetic playground","Explore the aroma → distortion link via the synesthetic register."]},
+];
+let LANG=localStorage.getItem('abx-lang')||'fr';
+function card(item){
+  const[t,d]=item[LANG];const badge=item.badge?`<span class="badge">${item.badge}</span>`:'';
+  return `<a class="card" href="${item.href}"><span class="t">${t} ${badge}</span><span class="d">${d}</span><span class="go">${T[LANG].go}</span></a>`;
+}
+function render(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(T[LANG][k]!=null)el.innerHTML=T[LANG][k];});
+  document.getElementById('g-read').innerHTML=READ.map(card).join('');
+  document.getElementById('g-tools').innerHTML=TOOLS.map(card).join('');
+  document.getElementById('fr').classList.toggle('on',LANG==='fr');
+  document.getElementById('en').classList.toggle('on',LANG==='en');
+}
+document.getElementById('fr').onclick=()=>{LANG='fr';localStorage.setItem('abx-lang','fr');render();};
+document.getElementById('en').onclick=()=>{LANG='en';localStorage.setItem('abx-lang','en');render();};
+// theme
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('abx-theme',t);document.getElementById('theme').textContent=t==='dark'?'☀':'◐';}
+const savedTheme=localStorage.getItem('abx-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+applyTheme(savedTheme);
+document.getElementById('theme').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+render();
+</script>
+</html>
